@@ -19,8 +19,6 @@ Capacity_list = []
 
 function cal_energy(spin)
     _energy = 0
-    Nx = size(spin, 1)
-    Ny = size(spin, 2)
     _energy += LinearAlgebra.dot(spin, circshift(spin, -1))
     _energy += LinearAlgebra.dot(spin, circshift(spin, (0, -1)))
     return _energy
@@ -95,23 +93,17 @@ energy_label = "Energy[J]"
 magnet_label = "Magnetic momoment per particle"
 capacity_label = "Heat capacity"
 
-energy_plot = plot(Thermal_list, Energy_list,
-    xlabel = thermal_label,
-    ylabel = energy_label
+function plot_quanity(thermal, quanity, name)
+    p = plot(
+        thermal,
+        quanity,
+        xlabel = "thermal",
+        ylabel = name
     )
-savefig("energy2.png")
-current()
+    savefig("$(name).png")
+    current()
+end
 
-magnet_plot = plot(Thermal_list, Magnet_list,
-    xlabel = thermal_label,
-    ylabel = magnet_label,
-    )
-savefig("magnet2.png")
-current()
-
-capacity_plot = plot(Thermal_list, Capacity_list,
-    xlabel = thermal_label,
-    ylabel = capacity_label
-    )
-savefig("capacity2.png")
-current()
+plot_quanity(Thermal_list, Energy_list, "energy")
+plot_quanity(Thermal_list, Magnet_list, "magnet")
+plot_quanity(Thermal_list, Capacity_list, "Capacity")
