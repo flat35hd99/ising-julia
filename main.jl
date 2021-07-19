@@ -1,7 +1,10 @@
+using ColorSchemes: thermal
+using Plots: push!
 # using Core: Vector
 using LinearAlgebra
 using Statistics
 using Plots
+using ColorSchemes
 
 gr()
 
@@ -16,6 +19,7 @@ Thermal_list = Vector(0.001:0.03:6.001)
 Energy_list = []
 Magnet_list = []
 Capacity_list = []
+Spin_snapshot = []
 
 function cal_energy(spin)
     _energy = 0
@@ -25,10 +29,10 @@ function cal_energy(spin)
 end
 
 function create_initial_state(Nx, Ny)
-    spin = reshape(rand(0:1, Nx*Ny),(Nx, Ny))
+    spin = ones(Int8, (Nx, Ny))
     while count(x -> x == 1, spin) != Int(Nx*Ny/2)
         if count(x -> x == 1, spin) > Int(Nx*Ny/2)
-            spin[rand(1:Nx),rand(1:Ny)] = 0
+            spin[rand(1:Nx),rand(1:Ny)] = -1
         else
             spin[rand(1:Nx),rand(1:Ny)] = 1
         end
@@ -86,6 +90,7 @@ for thermal in Thermal_list
         #)/ (thermal * Boltzman_constant)^2
         )/thermal^2
     )
+    push!(Spin_snapshot, spin)
 end
 
 thermal_label = "Thermal[K]"
@@ -107,3 +112,11 @@ end
 plot_quanity(Thermal_list, Energy_list, "energy")
 plot_quanity(Thermal_list, Magnet_list, "magnet")
 plot_quanity(Thermal_list, Capacity_list, "Capacity")
+
+anim = Animation()
+for (thermal, snapshot) in zip(Thermal_list, Spin_snapshot)
+    plt = heatmap(snapshot, aspect_ratio = 1, c=:grays, title = "T = $(thermal)")
+    frame(anim, plt)
+end
+
+gif(anim, "10fps_with_thermal.gif", fps = 10)
