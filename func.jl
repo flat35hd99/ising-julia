@@ -1,18 +1,23 @@
-using ColorSchemes: reverse
+using Base
+using ColorSchemes
 using Plots
 using LinearAlgebra
 using Statistics
-using ColorSchemes
 
 # config
 Boltzman_constant = 1.0
-Nx = 20
-Ny = 20
-STEPS = 20000
+N = 20
+STEPS = 30000
+MIN_TEMP = 0.001
+MAX_TEMP = 6.001
+STEP_TEMP = 0.005
+IS_REVERSE = true
 
-THERMAL_LIST = reverse(0.001:0.03:6.001)
+IS_REVERSE ? THERMAL_LIST = reverse(MIN_TEMP:STEP_TEMP:MAX_TEMP) : THERMAL_LIST = (MIN_TEMP:STEP_TEMP:MAX_TEMP)
 
 # initialize
+Nx = N
+Ny = N
 NTOTAL = Nx * Ny
 REFERENCE_RANGE = 2 * Int(STEPS/5)
 
@@ -58,6 +63,12 @@ function create_random_state(Nx, Ny)
     return spin
 end
 
+function get_dist_name()
+    IS_REVERSE ? mode = "reverse" : mode = "forward"
+    name = "mode_$(mode)-N_$(N)-STEPS_$(STEPS)-TEMPSTEPS_$(STEP_TEMP)"
+    return name
+end
+
 function plot_quanity(quanity, name)
     p = plot(
         THERMAL_LIST,
@@ -97,6 +108,11 @@ function main()
         push!(Capacity_list, Capacity(energy_list[REFERENCE_RANGE:end], thermal))
     end
 
+    # save result systems
+    dist_name = get_dist_name()
+    Base.Filesystem.mkdir(dist_name)
+    Base.Filesystem.cd(dist_name)
+
     energy_label = "Energy"
     magnet_label = "Magnet"
     capacity_label = "HeatCapacity"
@@ -111,6 +127,9 @@ function main()
         frame(anim, plt)
     end
     gif(anim, "10fps_with_thermal.gif", fps = 10)
+
+    # back to project root directory
+    Base.Filesystem.cd("..")
 end
 
 main()
