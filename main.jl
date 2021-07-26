@@ -15,7 +15,7 @@ NTOTAL = Nx * Ny
 STEPS = 40000
 REFERENCE_RANGE = 2 * Int(STEPS/5)
 
-Thermal_list = Vector(0.001:0.03:60.001)
+Thermal_list = Vector(0.001:0.03:0.901)
 
 function cal_energy(spin)
     _energy = 0
@@ -78,7 +78,7 @@ function main()
             i == Nx ? s_top = spin[1,j] : s_top = spin[i,j]
             i == 1  ? s_bottom = spin[Nx,j] : s_bottom = spin[i,j]
             j == Ny ? s_right = spin[i,1] : s_right = spin[i,j]
-            j == 1 ? s_left = spin[i,Nx] : s_left = spin[i,j] 
+            j == 1 ? s_left = spin[i,Nx] : s_left = spin[i,j]
     
             δE = -2 * spin_trial[i,j] * (s_top + s_bottom + s_right + s_left)
     
