@@ -7,20 +7,21 @@ using Statistics
 # config
 Boltzman_constant = 1.0
 N = 20
-STEPS = 30000
+REPLICA_NUMBERS = 11
+REPLICA_STEPS = 10000
+INIT_RELAX_STEPS = 10000
+
 MIN_TEMP = 0.001
 MAX_TEMP = 6.001
-STEP_TEMP = 0.005
-IS_REVERSE = true
-METHOD = "MC"
 
-IS_REVERSE ? THERMAL_LIST = reverse(MIN_TEMP:STEP_TEMP:MAX_TEMP) : THERMAL_LIST = (MIN_TEMP:STEP_TEMP:MAX_TEMP)
+METHOD = "REM"
 
 # initialize
 Nx = N
 Ny = N
 NTOTAL = Nx * Ny
 REFERENCE_RANGE = 2 * Int(STEPS/5)
+REPLICA_TEMPERTURE_LIST = (MIN_TEMP:(MAX_TEMP-MIN_TEMP)/(REPLICA_NUMBERS-1):MAX_TEMP)
 
 Energy(s) = LinearAlgebra.dot(s, circshift(s, -1)) + LinearAlgebra.dot(s, circshift(s, (0, -1)))
 Magnet(s) = sum(s)
@@ -65,8 +66,7 @@ function create_random_state(Nx, Ny)
 end
 
 function get_dist_name()
-    IS_REVERSE ? mode = "reverse" : mode = "forward"
-    name = "method_$(METHOD)-mode_$(mode)-N_$(N)-STEPS_$(STEPS)-TEMPSTEPS_$(STEP_TEMP)"
+    name = "method_$(METHOD)-N_$(N)-STEPS_$(STEPS)-TEMPSTEPS_$(STEP_TEMP)"
     return name
 end
 
@@ -81,7 +81,7 @@ function plot_quanity(quanity, name)
     current()
 end
 
-function runmc()
+function main()
     Energy_list = []
     Magnet_list = []
     Capacity_list = []
@@ -108,11 +108,6 @@ function runmc()
         push!(Magnet_list, Statistics.mean(magnet_list[REFERENCE_RANGE:end]))
         push!(Capacity_list, Capacity(energy_list[REFERENCE_RANGE:end], thermal))
     end
-    return Spin_snapshot, Energy_list, Magnet_list, Capacity_list
-end
-
-function main()
-    Spin_snapshot, Energy_list, Magnet_list, Capacity_list = runmc()
 
     # save result systems
     dist_name = get_dist_name()
